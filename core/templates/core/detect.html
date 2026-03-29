@@ -1,0 +1,208 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="detect-container">
+    <h1>Live Emotion Detection</h1>
+
+    <!-- STATUS -->
+    <div class="status" id="statusText">
+        🔴 Camera not started
+    </div>
+
+    <div class="camera-box">
+        <video id="video" autoplay playsinline></video>
+        <canvas id="canvas" style="display:none;"></canvas>
+    </div>
+
+    <!-- BUTTONS -->
+    <div class="buttons">
+        <button id="startBtn">Start Camera</button>
+        <button id="captureBtn">Capture Snapshot</button>
+    </div>
+
+    <!-- LIVE RESULT CARD -->
+     
+    <div class="result-card" id="resultCard">
+        <h3 class="result-title">Live Emotion Insight</h3>
+
+        <div class="emotion" id="emotionText">—</div>
+
+        <div class="confidence-bar">
+            <div class="confidence-fill" id="confidenceFill"></div>
+        </div>
+        <div id="confidenceText">Confidence: —</div>
+
+        <div class="emotion-message" id="emotionMessage">
+            Waiting for analysis…
+        </div>
+    </div>
+
+    
+
+    <!-- SNAPSHOT PREVIEW -->
+    <h3>Captured Images:</h3>
+
+    <div id="gallery"></div>
+
+<script>
+const video = document.getElementById('video');
+const canvas = document.getElementById('canvas');
+{% comment %} const photo = document.getElementById('photo'); {% endcomment %}
+const statusText = document.getElementById('statusText');
+const emotionText = document.getElementById('emotionText');
+const confidenceFill = document.getElementById('confidenceFill');
+const confidenceText = document.getElementById('confidenceText');
+
+let liveInterval = null;
+
+document.getElementById('startBtn').onclick = async () => {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = stream;
+
+        statusText.innerHTML = "🟢 Live analyzing…";
+
+        // 🔥 REAL AI LOOP
+        if (!liveInterval) {
+            liveInterval = setInterval(sendFrameToAPI, 2000);
+        }
+
+    } catch (err) {
+        statusText.innerHTML = "🔴 Camera access denied";
+    }
+};
+
+// 📸 CAPTURE SNAPSHOT
+document.getElementById('captureBtn').onclick = () => {
+    const context = canvas.getContext('2d');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    context.drawImage(video, 0, 0);
+
+    const imageData = canvas.toDataURL('image/png');
+    const image = document.createElement("img");
+    image.src = imageData;
+
+    document.getElementById("gallery").appendChild(image);
+    const gallery = document.getElementById("gallery");
+
+    gallery.appendChild(image);
+
+    if (gallery.children.length > 8) {
+        gallery.removeChild(gallery.firstChild);
+    }
+
+    console.log("Snapshot captured");
+};
+
+async function sendFrameToAPI() {
+    if (!video.videoWidth) return;
+
+    const context = canvas.getContext('2d');
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    context.drawImage(video, 0, 0);
+
+    canvas.toBlob(async (blob) => {
+
+        const formData = new FormData();
+        formData.append("file", blob, "frame.jpg");
+
+        try {
+            const res = await fetch("melodious-curiosity-production-da13.up.railway.app/predict", {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await res.json();
+
+            console.log("REAL DATA:", data);
+
+            updateUI(data);
+
+        } catch (err) {
+            console.error("API error:", err);
+        }
+
+    }, "image/jpeg", 0.7);
+}
+
+
+
+let emotionBuffer = [];
+
+function smoothEmotion(newEmotion) {
+    emotionBuffer.push(newEmotion);
+
+    if (emotionBuffer.length > 7) {
+        emotionBuffer.shift();
+    }
+
+    // most frequent emotion
+    const counts = {};
+    emotionBuffer.forEach(e => counts[e] = (counts[e] || 0) + 1);
+
+    return Object.keys(counts).reduce((a, b) =>
+        counts[a] > counts[b] ? a : b
+    );
+}
+
+function updateUI(data) {
+
+    if (!data || !data.emotion) return;
+
+    const emotion = smoothEmotion(data.emotion);
+    const confidence = Math.round(data.confidence * 100);
+
+    // 🔥 Update text
+    emotionText.innerHTML = emotion.toUpperCase();
+
+    // 🔥 Update ba
+    confidenceFill.style.width = confidence + "%";
+    confidenceText.innerHTML = "Confidence: " + confidence + "%";
+
+    const resultCard = document.getElementById('resultCard');
+    const emotionMessage = document.getElementById('emotionMessage');
+
+    // reset classes
+    resultCard.className = "result-card";
+
+    // 🎨 Emotion styling
+    if (emotion === "no_face") {
+    emotionText.innerHTML = "NO FACE";
+    confidenceFill.style.width = "0%";
+    confidenceText.innerHTML = "Confidence: 0%";
+    emotionMessage.innerHTML = "Face not detected. Look at camera.";
+    return;
+    }
+    if (emotion === "happy") {
+        resultCard.classList.add("happy");
+        emotionMessage.innerHTML = "Great! Your mood looks positive.";
+    }
+    else if (emotion === "sad") {
+        resultCard.classList.add("sad");
+        emotionMessage.innerHTML = "You seem a bit low.";
+    }
+    else if (emotion === "fear") {
+        resultCard.classList.add("fear");
+        emotionMessage.innerHTML = "You seem stressed.";
+    }
+    else if (emotion === "neutral") {
+        resultCard.classList.add("neutral");
+        emotionMessage.innerHTML = "Your mood looks stable.";
+    }
+    else if (emotion === "angry") {
+        resultCard.classList.add("angry");
+        emotionMessage.innerHTML = "You seem frustrated.";
+    }
+}
+
+</script>
+{% endblock %}
+
+{% block background %}
+<script src="{% static 'core/js/detect-bg.js' %}"></script>
+{% endblock %}

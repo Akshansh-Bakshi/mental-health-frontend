@@ -1,0 +1,53 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MindPulse</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'core/css/style.css' %}">
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="logo">
+        <svg width="38" height="38" viewBox="0 0 100 100" fill="none">
+            <path d="M30 50 C20 30,40 20,50 30 C60 20,80 30,70 50 
+                     C80 70,60 80,50 70 C40 80,20 70,30 50"
+                stroke="#38bdf8"
+                stroke-width="4"
+                fill="none"/>
+
+            <polyline points="20,50 35,50 40,40 50,60 60,40 70,50 80,50"
+                    stroke="#22c55e"
+                    stroke-width="3"
+                    fill="none"/>
+        </svg>
+
+        <span>MindPulse</span>
+    </div>
+    
+    <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="#">About</a>
+    </div>
+</nav>
+
+{% block content %}{% endblock %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/postprocessing/UnrealBloomPass.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/postprocessing/UnrealBloomPass.js"></script>
+
+{% block background %}{% endblock %}
+</body>
+</html>

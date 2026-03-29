@@ -1,0 +1,41 @@
+{% extends 'core/base.html' %}
+{%load static%}
+{% block content %}
+
+<section class="hero">
+    <h1>AI Powered Mental Health Detection</h1>
+
+    <p>
+        MindPulse analyzes facial expressions and voice patterns
+        to understand emotional wellbeing in real time.
+    </p>
+
+    <section class="features">
+
+    <div class="feature-card">
+        <h3>🧠 Facial Emotion Detection</h3>
+        <p>Analyze facial expressions in real time using AI.</p>
+        <a href="/detect/" class="feature-btn">Start Facial Scan</a>
+    </div>
+
+    <div class="feature-card">
+        <h3>🎤 Voice Emotion Detection</h3>
+        <p>Detect emotional tone from voice recordings.</p>
+        <a href="/voice/" class="feature-btn">Start Voice Scan</a>
+    </div>
+
+    <div class="feature-card">
+        <h3>📊 Mental Health Insights</h3>
+        <p>Get AI-powered insights based on emotional patterns.</p>
+        <a href="#" class="feature-btn">View Insights</a>
+    </div>
+
+</section>
+
+</section>
+
+{% endblock %}
+
+{%block background%}
+<script src="{% static 'core/js/background.js' %}"></script>
+{%endblock%}

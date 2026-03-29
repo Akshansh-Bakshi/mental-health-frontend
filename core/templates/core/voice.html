@@ -1,0 +1,31 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="detect-container">
+
+    <h1>Voice Emotion Detection</h1>
+    <p>Analyze emotional tone from voice recordings.</p>
+
+    <div class="voice-box">
+
+        <div class="voice-buttons">
+            <button id="startRecord">Start Recording</button>
+            <button id="stopRecord">Stop Recording</button>
+        </div>
+
+        <div class="voice-status">
+            Status: Waiting for input...
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block background %}
+<script src="{% static 'core/js/voice-bg.js' %}"></script>
+{% endblock %}

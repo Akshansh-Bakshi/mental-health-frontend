@@ -52,8 +52,8 @@ window.addEventListener("load", () => {
   const emotionColors = {
     happy: [0.3, 0.7, 1.0],     // blue
     sad: [1.0, 0.3, 0.3],       // red
-    angry: [0.2, 0.8, 0.7],     // teal
-    fear: [0.6, 0.3, 1.0],      // purple
+    angry: [0.6, 0.3, 1.0],     // teal
+    fear: [0.2, 0.8, 0.7],      // purple
     neutral: [1.0, 0.8, 0.3]    // yellow
   };
 

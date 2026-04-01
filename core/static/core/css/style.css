@@ -209,7 +209,7 @@ body {
     -webkit-text-fill-color: transparent;
 }
 
-canvas {
+#bgCanvas {
     position: fixed;
     top: 0;
     left: 0;
@@ -341,4 +341,88 @@ canvas {
     margin-top: 20px;
     font-size: 14px;
     color: #cbd5f5;
+}
+
+.chart-card {
+  height: 400px;
+  overflow: hidden;
+}
+
+.chart-wrapper {
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
+
+#pieChart {
+  max-height: 300px;
+  max-width: 300px;
+}
+
+/* SUMMARY ROW */
+.summary-row {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.summary-card {
+  background: rgba(255, 255, 255, 0.06);
+  padding: 18px 28px;
+  border-radius: 14px;
+  text-align: center;
+  backdrop-filter: blur(12px);
+
+  border: 1px solid rgba(255,255,255,0.08);
+
+  transition: 0.3s;
+}
+
+.summary-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(56,189,248,0.25);
+}
+
+.insight-box {
+  max-width: 650px;
+  margin: 0 auto;
+  font-size: 18px;
+  padding: 15px 20px;
+
+  background: rgba(255,255,255,0.04);
+  border-radius: 12px;
+
+  border-left: 4px solid #38bdf8;
+}
+
+.chart-full {
+  height: 350px;
+  position: relative;
+}
+
+.chart-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  margin-top: 60px;
+}
+
+.chart-center canvas {
+  max-width: 320px;
+  max-height: 320px;
+}
+
+#pieChart {
+  width: 300px !important;
+  height: 300px !important;
+}
+
+.summary-row,
+.insight-box,
+h1 {
+  position: relative;
+  z-index: 2;
 }

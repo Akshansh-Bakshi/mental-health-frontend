@@ -1,0 +1,176 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<div class="container mt-5 text-white">
+
+  <!-- 🧠 HEADER -->
+    <div class="text-center mb-5" style="margin-top: 40px;">
+        <h1 style="font-weight: 600;">📊 Mental Health Insights</h1>
+    </div>
+
+  <!-- 🧠 INSIGHT -->
+  <div class="text-center mb-4 insight-box">
+    <h5>🧠 Insight</h5>
+    <p>{{ data.insight }}</p>
+  </div>
+
+  <!-- 📈 LINE CHART -->
+  <div class="chart-full mb-5">
+    <h5 class="text-center mb-3">Emotion Timeline</h5>
+    <canvas id="lineChart"></canvas>
+  </div>
+
+  <!-- 🥧 PIE CHART -->
+  <div class="chart-center mb-5">
+    <h5 class="text-center mb-3">Emotion Distribution</h5>
+    <canvas id="pieChart"></canvas>
+  </div>
+
+</div>
+
+<script id="data-script" type="application/json">
+{
+  "emotions": {{ data.emotion_list|safe }},
+  "timestamps": {{ data.timestamps|safe }},
+  "counts": {{ data.emotion_counts|safe }}
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  const rawData = JSON.parse(document.getElementById("data-script").textContent);
+
+  const emotions = rawData.emotions || [];
+  const timestamps = rawData.timestamps || [];
+  const counts = rawData.counts || {};
+
+  console.log("Emotions:", emotions);
+  console.log("Timestamps:", timestamps);
+  console.log("Counts:", counts);
+
+  if (emotions.length === 0) {
+    console.log("No data to display");
+    return;
+  }
+
+  // 🔥 Reduce data
+  const step = Math.max(1, Math.ceil(emotions.length / 40));
+
+  const filteredEmotions = emotions.filter((_, i) => i % step === 0);
+  const filteredTimestamps = timestamps.filter((_, i) => i % step === 0);
+
+  // ✅ FIXED mapping (lowercase)
+  const emotionMap = {
+    angry: 0,
+    fear: 1,
+    sad: 2,
+    neutral: 3,
+    happy: 4
+  };
+
+  const values = filteredEmotions.map(e => emotionMap[e] ?? 3);
+
+  // 🔥 Smooth data
+  function smoothData(arr) {
+    return arr.map((_, i, a) => {
+      let sum = 0, count = 0;
+      for (let j = i - 1; j <= i + 1; j++) {
+        if (a[j] !== undefined) {
+          sum += a[j];
+          count++;
+        }
+      }
+      return sum / count;
+    });
+  }
+
+  const smoothValues = smoothData(values);
+
+  // 📈 LINE CHART
+  new Chart(document.getElementById("lineChart"), {
+    type: "line",
+    data: {
+      labels: filteredTimestamps.map(t => String(t).slice(0, 8)),
+      datasets: [{
+        label: "Emotion Trend",
+        data: smoothValues,
+        borderColor: "#4facfe",
+        borderWidth: 3,
+        backgroundColor: "rgba(79,172,254,0.2)",
+        tension: 0.4,
+        pointRadius: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: {
+          ticks: {
+            maxTicksLimit: 8,
+            color: "#aaa"
+          }
+        },
+        y: {
+          ticks: {
+            callback: function(value){
+              const map = {
+                0: "Angry",
+                1: "Fear",
+                2: "Sad",
+                3: "Neutral",
+                4: "Happy"
+              };
+              return map[value] || value;
+            },
+            color: "#fff"
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          labels: {
+            color: "#fff"
+          }
+        }
+      }
+    }
+  });
+
+  // 🥧 PIE CHART
+  new Chart(document.getElementById("pieChart"), {
+    type: "pie",
+    data: {
+      labels: Object.keys(counts),
+      datasets: [{
+        data: Object.values(counts),
+        backgroundColor: [
+          "#4facfe",
+          "#ff6b6b",
+          "#feca57",
+          "#1dd1a1",
+          "#5f27cd"
+        ]
+      }]
+    },
+    options: {
+      responsive: true
+    }
+  });
+
+});
+</script>
+
+{% endblock %}
+
+{% block background %}
+<script>
+  window.emotionCounts = {{ data.emotion_counts|safe }};
+</script>
+<script src="{% static 'core/js/insights.js' %}"></script>
+{% endblock %}

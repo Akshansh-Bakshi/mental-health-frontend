@@ -1,8 +1,5 @@
 window.addEventListener("load", () => {
 
-  // =========================
-  // SCENE SETUP
-  // =========================
   const scene = new THREE.Scene();
 
   let mouse = { x: 0, y: 0 };
@@ -31,16 +28,10 @@ window.addEventListener("load", () => {
 
   camera.position.z = 5;
 
-  // =========================
-  // GET EMOTION DATA
-  // =========================
   const emotionCounts = window.emotionCounts || {};
 
   console.log("Emotion Counts:", emotionCounts);
 
-  // =========================
-  // PARTICLES SETUP
-  // =========================
   const particlesCount = 1400;
 
   const particlesGeometry = new THREE.BufferGeometry();
@@ -71,9 +62,6 @@ window.addEventListener("load", () => {
     emotionPool = ["neutral"];
   }
 
-  // =========================
-  // ASSIGN PARTICLES
-  // =========================
   for (let i = 0; i < particlesCount; i++) {
 
     // positions
@@ -115,9 +103,6 @@ window.addEventListener("load", () => {
 
   scene.add(particlesMesh);
 
-  // =========================
-  // ANIMATION
-  // =========================
   function animate() {
     requestAnimationFrame(animate);
 
@@ -139,9 +124,6 @@ window.addEventListener("load", () => {
 
   animate();
 
-  // =========================
-  // RESPONSIVE
-  // =========================
   window.addEventListener("resize", () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
 

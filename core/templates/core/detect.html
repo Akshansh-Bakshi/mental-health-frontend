@@ -112,7 +112,7 @@ async function sendFrameToAPI() {
         formData.append("file", blob, "frame.jpg");
 
         try {
-            const API_URL = new URL("https://melodious-curiosity-production-da13.up.railway.app/predict");
+            const API_URL = new URL("http://127.0.0.1:8000/predict");
 
             const res = await fetch(API_URL.href, {
                 method: "POST",

@@ -57,21 +57,3 @@ window.addEventListener("resize", () => {
 
 });
 
-// for (let i = 0; i < drops.length; i++) {
-
-//     const text = letters.charAt(
-//         Math.floor(Math.random() * letters.length)
-//     );
-
-//     // bright leader character
-//     ctx.fillStyle = "#e0f2fe";
-//     ctx.shadowColor = "#38bdf8";
-//     ctx.shadowBlur = 12;
-
-//     ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
-//     // trail characters (dimmer)
-//     ctx.fillStyle = "#38bdf8";
-//     ctx.shadowBlur = 0;
-
-// }

@@ -1,0 +1,154 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="detect-container">
+
+    <!-- HEADER -->
+    <div class="assessment-header">
+        <h1>Multimodal Mental Health Assessment</h1>
+        <p>
+            Analyze facial and vocal emotional patterns in real time.
+        </p>
+    </div>
+
+    <!-- MAIN ANALYSIS GRID -->
+    <div class="assessment-grid">
+
+        <!-- FACE PANEL -->
+        <div class="assessment-panel">
+
+            <h2>Facial Emotion Analysis</h2>
+
+            <div class="status" id="statusText">
+                🔴 Camera not started
+            </div>
+
+            <div class="camera-box">
+                <video id="video" autoplay playsinline></video>
+                <canvas id="canvas" style="display:none;"></canvas>
+            </div>
+
+            <div class="buttons">
+                <button id="startBtn">Start Camera</button>
+                <button id="stopBtn">Stop Camera</button>
+            </div>
+
+            <div class="result-card" id="resultCard">
+                <h3 class="result-title">Live Face Emotion</h3>
+
+                <div class="emotion" id="emotionText">—</div>
+
+                <div class="confidence-bar">
+                    <div class="confidence-fill" id="confidenceFill"></div>
+                </div>
+
+                <div id="confidenceText">Confidence: —</div>
+
+                <div class="emotion-message" id="emotionMessage">
+                    Waiting for analysis...
+                </div>
+            </div>
+
+        </div>
+
+        <!-- VOICE PANEL -->
+        <div class="assessment-panel">
+
+            <h2>Voice Emotion Analysis</h2>
+
+            <div class="voice-box">
+            
+                <div class="voice-buttons">
+                    <button id="startRecord">Start Recording</button>
+                    <button id="stopRecord">Stop Recording</button>
+                </div>
+
+                <div class="voice-status" id="voiceStatus">
+                    Status: Waiting for input...
+                </div>
+
+                <div class="result-card" id="voiceResultCard">
+                    <h3 class="result-title">Voice Emotion</h3>
+
+                    <div class="emotion" id="voiceEmotionText">—</div>
+
+                    <div class="confidence-bar">
+                        <div class="confidence-fill" id="voiceConfidenceFill"></div>
+                    </div>
+
+                    <div id="voiceConfidenceText">Confidence: —</div>
+
+                    <div class="emotion-message" id="voiceEmotionMessage">
+                        Waiting for recording...
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- SELF REFLECTION QUESTIONS -->
+    <div class="questions-section">
+
+        <h2>Self Reflection Questions</h2>
+
+        <div class="question-box">
+            <label>1. How have you been feeling emotionally today?</label>
+            <textarea rows="3" placeholder="Describe your emotional state..."></textarea>
+        </div>
+
+        <div class="question-box">
+            <label>2. Have you experienced unusual stress recently?</label>
+            <textarea rows="3" placeholder="Mention recent stressors..."></textarea>
+        </div>
+
+        <div class="question-box">
+            <label>3. How has your sleep quality been this week?</label>
+            <textarea rows="3" placeholder="Describe your sleep pattern..."></textarea>
+        </div>
+
+        <div class="question-box">
+            <label>4. Is there anything currently affecting your mental wellbeing?</label>
+            <textarea rows="3" placeholder="Optional reflection..."></textarea>
+        </div>
+
+    </div>
+
+    <!-- CTA -->
+    <div class="assessment-actions">
+        <a href="{% url 'insights' %}" class="feature-btn">
+            View Mental Health Insights →
+        </a>
+    </div>
+
+</div>
+
+<!-- OPTIONAL PROMPT MODAL -->
+<div id="promptModal" class="prompt-modal hidden">
+    <div class="prompt-card">
+        <h3>Quick Reflection</h3>
+
+        <p id="promptQuestion">
+            How have you been feeling today?
+        </p>
+
+        <textarea id="promptResponse"
+                  rows="4"
+                  placeholder="Type your response here..."></textarea>
+
+        <div class="prompt-actions">
+            <button id="submitPrompt">Submit</button>
+            <button id="skipPrompt">Skip</button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block background %}
+<script src="{% static 'core/js/assessment.js' %}"></script>
+<script src="{% static 'core/js/matrix-bg.js' %}"></script>
+{% endblock %}

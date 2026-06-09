@@ -3,38 +3,142 @@
 
 {% block content %}
 
-<div class="container mt-5 text-white">
+<style>
+    .insights-wrapper {
+        width: 95%;
+        max-width: 1600px;
+        margin: 40px auto;
+        color: white;
+    }
 
-  <!-- 🧠 HEADER -->
-    <div class="text-center mb-5" style="margin-top: 40px;">
-        <h1 style="font-weight: 600;">📊 Mental Health Insights</h1>
+.insight-box {
+    background: rgba(255,255,255,0.06);
+    border-left: 4px solid #38bdf8;
+    border-radius: 16px;
+    padding: 18px 24px;
+    margin-bottom: 40px;
+    backdrop-filter: blur(12px);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.chart-heading {
+    text-align: center;
+    width: 100%;
+    margin-bottom: 18px;
+    font-weight: 700;
+}
+
+    .chart-card {
+        background: rgba(8,15,35,0.55);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 22px;
+        padding: 25px;
+        margin-bottom: 35px;
+        backdrop-filter: blur(12px);
+    }
+
+    .timeline-container {
+        height: 420px;
+        width: 100%;
+    }
+
+    .pie-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+        margin-top: 20px;
+    }
+
+    .pie-container {
+        height: 310px;
+        width: 100%;
+        position: relative;
+    }
+    .insights-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+}
+    .insights-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      margin-bottom: 35px;
+    }
+
+    canvas {
+        width: 100% !important;
+        height: 100% !important;
+    }
+
+    @media (max-width: 1100px) {
+        .pie-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+
+<div class="insights-wrapper">
+
+    <div class="insights-header">
+        <h1 class="mb-4">📊 Mental Health Insights</h1>
+
+        <div class="insight-box">
+            <h5>🧠 Insight</h5>
+            <p class="mb-0">{{ data.insight }}</p>
+        </div>
     </div>
 
-  <!-- 🧠 INSIGHT -->
-  <div class="text-center mb-4 insight-box">
-    <h5>🧠 Insight</h5>
-    <p>{{ data.insight }}</p>
-  </div>
+    <!-- TIMELINE -->
+    <div class="chart-card">
+        <h4 class="chart-heading">Combined Emotion Timeline</h4>
+        <div class="timeline-container">
+            <canvas id="lineChart"></canvas>
+        </div>
+    </div>
 
-  <!-- 📈 LINE CHART -->
-  <div class="chart-full mb-5">
-    <h5 class="text-center mb-3">Emotion Timeline</h5>
-    <canvas id="lineChart"></canvas>
-  </div>
+    <!-- PIE CHARTS -->
+    <div class="pie-grid">
 
-  <!-- 🥧 PIE CHART -->
-  <div class="chart-center mb-5">
-    <h5 class="text-center mb-3">Emotion Distribution</h5>
-    <canvas id="pieChart"></canvas>
-  </div>
+        <div class="chart-card">
+            <h5 class="chart-heading">Combined Distribution</h5>
+            <div class="pie-container">
+                <canvas id="pieChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <h5 class="chart-heading">Facial Distribution</h5>
+            <div class="pie-container">
+                <canvas id="faceChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <h5 class="chart-heading">Voice Distribution</h5>
+            <div class="pie-container">
+                <canvas id="voiceChart"></canvas>
+            </div>
+        </div>
+
+    </div>
 
 </div>
 
 <script id="data-script" type="application/json">
 {
-  "emotions": {{ data.emotion_list|safe }},
-  "timestamps": {{ data.timestamps|safe }},
-  "counts": {{ data.emotion_counts|safe }}
+    "emotions": {{ data.emotion_list|safe }},
+    "timestamps": {{ data.timestamps|safe }},
+    "counts": {{ data.emotion_counts|safe }},
+    "faceCounts": {{ data.face_counts|safe }},
+    "voiceCounts": {{ data.voice_counts|safe }}
 }
 </script>
 
@@ -43,125 +147,123 @@
 <script>
 document.addEventListener("DOMContentLoaded", function () {
 
-  const rawData = JSON.parse(document.getElementById("data-script").textContent);
+    const rawData = JSON.parse(
+        document.getElementById("data-script").textContent
+    );
 
-  const emotions = rawData.emotions || [];
-  const timestamps = rawData.timestamps || [];
-  const counts = rawData.counts || {};
+    const emotions = rawData.emotions || [];
+    const timestamps = rawData.timestamps || [];
+    const counts = rawData.counts || {};
+    const faceCounts = rawData.faceCounts || {};
+    const voiceCounts = rawData.voiceCounts || {};
 
-  console.log("Emotions:", emotions);
-  console.log("Timestamps:", timestamps);
-  console.log("Counts:", counts);
+    const emotionMap = {
+        angry: 0,
+        fear: 1,
+        sad: 2,
+        neutral: 3,
+        happy: 4
+    };
 
-  if (emotions.length === 0) {
-    console.log("No data to display");
-    return;
-  }
+    const reverseMap = {
+        0: "Angry",
+        1: "Fear",
+        2: "Sad",
+        3: "Neutral",
+        4: "Happy"
+    };
 
-  // 🔥 Reduce data
-  const step = Math.max(1, Math.ceil(emotions.length / 40));
+    const values = emotions.map(e => emotionMap[e] ?? 2);
 
-  const filteredEmotions = emotions.filter((_, i) => i % step === 0);
-  const filteredTimestamps = timestamps.filter((_, i) => i % step === 0);
-
-  // ✅ FIXED mapping (lowercase)
-  const emotionMap = {
-    angry: 0,
-    fear: 1,
-    sad: 2,
-    neutral: 3,
-    happy: 4
-  };
-
-  const values = filteredEmotions.map(e => emotionMap[e] ?? 3);
-
-  // 🔥 Smooth data
-  function smoothData(arr) {
-    return arr.map((_, i, a) => {
-      let sum = 0, count = 0;
-      for (let j = i - 1; j <= i + 1; j++) {
-        if (a[j] !== undefined) {
-          sum += a[j];
-          count++;
-        }
-      }
-      return sum / count;
-    });
-  }
-
-  const smoothValues = smoothData(values);
-
-  // 📈 LINE CHART
-  new Chart(document.getElementById("lineChart"), {
-    type: "line",
-    data: {
-      labels: filteredTimestamps.map(t => String(t).slice(0, 8)),
-      datasets: [{
-        label: "Emotion Trend",
-        data: smoothValues,
-        borderColor: "#4facfe",
-        borderWidth: 3,
-        backgroundColor: "rgba(79,172,254,0.2)",
-        tension: 0.4,
-        pointRadius: 2
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: {
-          ticks: {
-            maxTicksLimit: 8,
-            color: "#aaa"
-          }
+    new Chart(document.getElementById("lineChart"), {
+        type: "line",
+        data: {
+            labels: timestamps,
+            datasets: [{
+                label: "Emotion Trend",
+                data: values,
+                borderColor: "#4facfe",
+                borderWidth: 3,
+                tension: 0.4,
+                pointRadius: 4,
+                fill: false
+            }]
         },
-        y: {
-          ticks: {
-            callback: function(value){
-              const map = {
-                0: "Angry",
-                1: "Fear",
-                2: "Sad",
-                3: "Neutral",
-                4: "Happy"
-              };
-              return map[value] || value;
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: { color: "#fff" }
+                }
             },
-            color: "#fff"
-          }
+            scales: {
+                x: {
+                    ticks: { color: "#aaa" }
+                },
+                y: {
+                    min: 0,
+                    max: 4,
+                    ticks: {
+                        stepSize: 1,
+                        color: "#fff",
+                        callback: value => reverseMap[value]
+                    }
+                }
+            }
         }
-      },
-      plugins: {
-        legend: {
-          labels: {
-            color: "#fff"
-          }
-        }
-      }
-    }
-  });
+    });
 
-  // 🥧 PIE CHART
-  new Chart(document.getElementById("pieChart"), {
-    type: "pie",
-    data: {
-      labels: Object.keys(counts),
-      datasets: [{
-        data: Object.values(counts),
-        backgroundColor: [
-          "#4facfe",
-          "#ff6b6b",
-          "#feca57",
-          "#1dd1a1",
-          "#5f27cd"
-        ]
-      }]
-    },
-    options: {
-      responsive: true
-    }
-  });
+function buildPie(canvasId, dataset) {
+    new Chart(document.getElementById(canvasId), {
+        type: "pie",
+        data: {
+            labels: Object.keys(dataset),
+            datasets: [{
+                data: Object.values(dataset),
+                radius: '82%',
+                backgroundColor: [
+                    "#4facfe",
+                    "#ff6b6b",
+                    "#feca57",
+                    "#1dd1a1",
+                    "#5f27cd"
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+
+            layout: {
+                padding: {
+                    top: 10,
+                    bottom: 10
+                }
+            },
+
+            plugins: {
+                legend: {
+                    display: true,
+                    position: "bottom",
+                    align: "center",
+                    maxHeight: 60,
+                    labels: {
+                        color: "#fff",
+                        padding: 18,
+                        boxWidth: 14,
+                        font: {
+                            size: 13
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+    buildPie("pieChart", counts);
+    buildPie("faceChart", faceCounts);
+    buildPie("voiceChart", voiceCounts);
 
 });
 </script>
@@ -170,7 +272,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 {% block background %}
 <script>
-  window.emotionCounts = {{ data.emotion_counts|safe }};
+window.emotionCounts = {{ data.emotion_counts|safe }};
 </script>
 <script src="{% static 'core/js/insights.js' %}"></script>
 {% endblock %}
